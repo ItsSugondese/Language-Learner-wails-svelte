@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"lang-learner-wails/services/file_services"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -14,7 +15,7 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
-
+	fileService := file_services.NewFileService()
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "lang-learner-wails",
@@ -27,6 +28,7 @@ func main() {
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
+			fileService,
 		},
 	})
 
