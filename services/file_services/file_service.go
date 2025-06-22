@@ -12,9 +12,18 @@ func NewFileService() *FileService {
 	return &FileService{}
 }
 
-func (f *FileService) ListFiles(path string) ([]string, error) {
-	fullPath := filepath.Join(filepathconstants.AssetsFolderAbsolutePath, path)
-	filePathSlices, err := file_utils.GetFileNamesInPathFromDirectory(fullPath)
+func (f *FileService) ListFiles(pathEnum string, withDir bool) ([]string, error) {
+	filePathSlices, err := file_utils.GetFileNamesInPathFromDirectory(filepathconstants.FilePathMappings[pathEnum].Path, withDir)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return filePathSlices, nil
+}
+
+func (f *FileService) ListDataFromFiles(pathEnum string, fileName string) ([]string, error) {
+	filePathSlices, err := file_utils.GetAllFromFileAsSlices(filepath.Join(filepathconstants.FilePathMappings[pathEnum].Path, fileName))
 
 	if err != nil {
 		return nil, err

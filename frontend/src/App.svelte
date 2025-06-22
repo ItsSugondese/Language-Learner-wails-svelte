@@ -23,6 +23,8 @@
 
   // Check if current route should show back button
   $: showBackButton = !NO_BACK_BUTTON.includes($location);
+
+  $: localStorage.setItem('lastRoute', $location);
 </script>
 
 <div class="flex flex-col min-h-screen">
