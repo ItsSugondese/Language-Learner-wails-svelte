@@ -1,15 +1,5 @@
 import {TranslateFromToEnums} from "../../enums/translate_from_to_enums.js";
 
-export function getSplitWords(str, delimiter, noOfWords) {
-    let words = str.split(delimiter) ?? null;
-
-    if(words.length !== noOfWords) {
-        return null;
-    }
-
-    return words;
-}
-
 export function getSplitWordMeaningObject(str, delimiter, direction) {
     let words = str.split(delimiter) ?? null;
 

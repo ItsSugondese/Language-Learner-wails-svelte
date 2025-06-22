@@ -16,13 +16,9 @@
     const handleCancel = () => dispatch('cancel');
     const handleClear = () => text = '';
 
-    // CodeMirror options
-    const options = {
-        lineNumbers: true,
-        lineWrapping: true,  // enable wrapping so line numbers count wrapped lines properly
-        mode: 'text', // plain text mode
-        theme: 'default', // you can customize
-    };
+    $: if (visible) {
+        text = initialText;
+    }
 </script>
 
 {#if visible}
@@ -34,7 +30,7 @@
             </div>
 
             <!-- Body -->
-            <div class="p-4 flex-1 overflow-auto" style="height:400px;  text-align: left;">
+            <div class="p-4 flex-1 overflow-auto max-h-96" style="height:400px;  text-align: left;">
                     <CodeMirror bind:value={text} options={{ lineNumbers: true, lineWrapping: true }} style="height: 100%; " />
 
             </div>

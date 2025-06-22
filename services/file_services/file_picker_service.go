@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	filepathconstants "lang-learner-wails/constants/file_path_constants"
 )
 
 type FilePicker struct {
@@ -23,6 +24,7 @@ func (f *FilePicker) SelectFile() (string, error) {
 		return "", fmt.Errorf("context not initialized")
 	}
 	return runtime.OpenFileDialog(f.ctx, runtime.OpenDialogOptions{
-		Title: "Pick a file",
+		Title:            "Pick a file",
+		DefaultDirectory: filepathconstants.GermanSampleFolder.Path,
 	})
 }

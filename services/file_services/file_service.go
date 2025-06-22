@@ -22,8 +22,18 @@ func (f *FileService) ListFiles(pathEnum string, withDir bool) ([]string, error)
 	return filePathSlices, nil
 }
 
-func (f *FileService) ListDataFromFiles(pathEnum string, fileName string) ([]string, error) {
+func (f *FileService) ListDataFromFilePathEnum(pathEnum string, fileName string) ([]string, error) {
 	filePathSlices, err := file_utils.GetAllFromFileAsSlices(filepath.Join(filepathconstants.FilePathMappings[pathEnum].Path, fileName))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return filePathSlices, nil
+}
+
+func (f *FileService) ListDataFromFilePath(path string) ([]string, error) {
+	filePathSlices, err := file_utils.GetAllFromFileAsSlices(path)
 
 	if err != nil {
 		return nil, err

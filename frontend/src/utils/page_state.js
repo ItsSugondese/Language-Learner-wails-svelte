@@ -1,6 +1,6 @@
 // src/utils/pageState.js
 
-export function getPageKey(pathname = window.location.pathname) {
+export function getPageKey(pathname) {
     return 'appState:' + pathname;
 }
 

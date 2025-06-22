@@ -1,21 +1,16 @@
 <script>
   import {onDestroy, onMount, tick} from 'svelte';
-  import {ListDataFromFiles, ListFiles} from '../../../wailsjs/go/file_services/FileService';
+  import { ListDataFromFilePathEnum, ListFiles} from '../../../wailsjs/go/file_services/FileService';
   import {FilePathEnums} from '../../enums/file_path_enums.js';
   import {DelimiterConstant} from "../../constants/delimiter_constants.js";
   import {getSplitWordMeaningObject} from "../../helper/word/word_splitter.js";
   import {TranslateFromToEnums} from "../../enums/translate_from_to_enums.js";
   import {getRandomForList} from "../../utils/math_utils.js"; // adjust import path
 
-  import { push } from 'svelte-spa-router';
+  import {location} from 'svelte-spa-router';
   import {loadPageState, savePageState} from "../../utils/page_state.js";
   import {LogInfo} from "../../../wailsjs/runtime/runtime.js";
 
-  // on app load, redirect to last route if available
-  const last = localStorage.getItem('lastRoute');
-  if (last && last !== window.location.pathname) {
-    push(last);
-  }
 
   let searchText = '';
   let files = [];
@@ -27,7 +22,7 @@
   let randomNum = 0
 
   onMount(async () => {
-    const state = await loadPageState();
+    const state = await loadPageState($location);
     LogInfo("Loaded state: " + JSON.stringify(state));
     if (state) {
       searchText = state.searchText || '';
@@ -68,7 +63,7 @@
   // When user clicks a file from the list:
   async function selectFile(file) {
     searchText = file;
-    allWords = await ListDataFromFiles(FilePathEnums.GermanAllWordFolderPath, file);
+    allWords = await ListDataFromFilePathEnum(FilePathEnums.GermanAllWordFolderPath, file);
     setWordMeaning()
 
     isOpen = false; // close dropdown
@@ -102,7 +97,7 @@
   onDestroy(() => {
     window.removeEventListener('click', handleClickOutside);
 
-    savePageState({ direction, searchText, allWords, randomNum });
+    savePageState({ direction, searchText, allWords, randomNum }, $location);
   });
 
   let word = null;
@@ -151,7 +146,7 @@
       for="search"
       class="block text-lg font-semibold mt-10 mb-2 text-gray-900"
     >
-      Search
+      {allWords.length} Words
     </label>
 
     <div class="relative min-w-80">

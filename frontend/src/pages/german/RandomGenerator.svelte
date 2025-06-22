@@ -1,26 +1,19 @@
 <script>
-    import {onDestroy, onMount, tick} from 'svelte';
-    import {ListDataFromFiles, ListFiles} from '../../../wailsjs/go/file_services/FileService';
-    import {FilePathEnums} from '../../enums/file_path_enums.js';
+    import {onDestroy, onMount, } from 'svelte';
+    import {ListDataFromFilePath} from '../../../wailsjs/go/file_services/FileService';
     import {DelimiterConstant} from "../../constants/delimiter_constants.js";
     import {getSplitWordMeaningObject} from "../../helper/word/word_splitter.js";
     import {TranslateFromToEnums} from "../../enums/translate_from_to_enums.js";
     import {getRandomForList} from "../../utils/math_utils.js"; // adjust import path
-
-    import { push } from 'svelte-spa-router';
     import {loadPageState, savePageState} from "../../utils/page_state.js";
     import {LogInfo} from "../../../wailsjs/runtime/runtime.js";
-    import { SelectFile } from '../../../wailsjs/go/file_services/FilePicker.js';
+    import {SelectFile} from '../../../wailsjs/go/file_services/FilePicker.js';
     import InsertValueModal from "../../components/common/modals/InsertValueModal.svelte";
-    let selectedFile = '';
-    // on app load, redirect to last route if available
-    const last = localStorage.getItem('lastRoute');
-    if (last && last !== window.location.pathname) {
-        push(last);
-    }
+    import {convertListToString, convertStringToList} from "../../utils/string_utils.js";
+    import { location } from 'svelte-spa-router';
+
 
     let searchText = '';
-    let container; // Reference to wrapper div
     let allWords = []
     let direction = TranslateFromToEnums.GermanToEnglish
     let randomNum = 0
@@ -30,7 +23,9 @@
         try {
             const filePath = await SelectFile();
             if (filePath) {
-                allWords = await ListDataFromFiles(FilePathEnums.GermanAllWordFolderPath, filePath);
+                const newWords = await ListDataFromFilePath(filePath);
+                allWords = [...allWords, ...newWords];
+
             }
         } catch (err) {
             console.error("File selection failed:", err);
@@ -38,8 +33,7 @@
     }
 
     onMount(async () => {
-        const state = await loadPageState();
-        LogInfo("Loaded state: " + JSON.stringify(state));
+        const state = await loadPageState($location);
         if (state) {
             searchText = state.searchText || '';
             allWords = state.allWords || [];
@@ -84,19 +78,20 @@
     }
 
     onDestroy(() => {
-        savePageState({ direction, searchText, allWords, randomNum });
+        savePageState({ direction, searchText, allWords, randomNum }, $location);
     });
 
     let showModal = false;
     let editorInput = 'Start here...';
-    let finalText = '';
 
     function openModal() {
+        editorInput = convertListToString(allWords, DelimiterConstant.lineBreak);
+        LogInfo(editorInput)
         showModal = true;
     }
 
     function handleDone(event) {
-        finalText = event.detail.text;
+        allWords = convertStringToList(event.detail.text, DelimiterConstant.lineBreak);
         showModal = false;
     }
 
@@ -130,13 +125,13 @@
                 for="search"
                 class="block text-lg font-semibold mt-10 mb-2 text-gray-900"
         >
-            Search
+            {allWords.length} Words
         </label>
 
         <div class="relative min-w-80">
-            <div class="flex">
+            <div class="flex w-full justify-around">
 
-            <button on:click={() => showModal = true} class="p-2 bg-blue-600 text-white rounded">Insert Values</button>
+            <button on:click={openModal} class="p-2 bg-blue-600 text-white rounded">Insert Values</button>
             <button on:click={chooseFile} class="p-2 bg-blue-500 text-white rounded">Select File</button>
             </div>
 
@@ -147,9 +142,6 @@
                     on:done={handleDone}
                     on:cancel={handleCancel}
             />
-            {#if selectedFile}
-                <p class="mt-2">Selected file: {selectedFile}</p>
-            {/if}
         </div>
     </div>
 
