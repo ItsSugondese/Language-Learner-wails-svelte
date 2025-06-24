@@ -1,5 +1,8 @@
 // src/utils/pageState.js
 
+import { LogInfo } from '../../wailsjs/runtime/runtime.js';
+
+
 export function getPageKey(pathname) {
     return 'appState:' + pathname;
 }

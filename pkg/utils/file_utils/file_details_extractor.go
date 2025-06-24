@@ -90,3 +90,8 @@ func GetCombinedLinesFromFilesParallel(filePaths []string) ([]string, error) {
 
 	return allLines, nil
 }
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil || !os.IsNotExist(err)
+}

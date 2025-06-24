@@ -1,5 +1,6 @@
 <script>
   import Router, { location } from 'svelte-spa-router';
+
   import Homepage from './pages/homepages/Homepage.svelte';
   import GermanHomepage from './pages/homepages/GermanHomepage.svelte';
   import AllWords from './pages/german/AllWords.svelte';

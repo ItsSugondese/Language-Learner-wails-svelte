@@ -7,5 +7,5 @@ export function getSplitWordMeaningObject(str, delimiter, direction) {
         return null;
     }
 
-    return direction === TranslateFromToEnums.EnglishToGerman ? Object.freeze({word: words[1].trim(), meaning: words[0].trim()}) : Object.freeze({word: words[0].trim(), meaning: words[1].trim()});
+    return direction === TranslateFromToEnums.EnglishToGerman.name ? Object.freeze({word: words[1].trim(), meaning: words[0].trim()}) : Object.freeze({word: words[0].trim(), meaning: words[1].trim()});
 }

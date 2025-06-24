@@ -1,4 +1,4 @@
 export const TranslateFromToEnums = Object.freeze({
-    GermanToEnglish: "GermanToEnglish",
-    EnglishToGerman: "EnglishToGerman",
+    GermanToEnglish: Object.freeze({name: "GermanToEnglish", word: "German", meaning: "English"}),
+    EnglishToGerman: Object.freeze({name: "EnglishToGerman", word: "English", meaning: "German"}),
 });
