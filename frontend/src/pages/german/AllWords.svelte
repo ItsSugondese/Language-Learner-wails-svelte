@@ -1,18 +1,12 @@
 <script>
-  import {onDestroy, onMount,tick} from 'svelte';
+  import {onDestroy, onMount, tick} from 'svelte';
 
-  import {
-    ListDataFromFilePathEnum,
-    ListFiles,
-  } from '../../../wailsjs/go/file_services/FileService';
-  import { FilePathEnums } from '../../enums/file_path_enums.js';
-  import { DelimiterConstant } from '../../constants/delimiter_constants.js';
-  import { getSplitWordMeaningObject } from '../../helper/word/word_splitter.js';
-  import { TranslateFromToEnums } from '../../enums/translate_from_to_enums.js';
-  import { getRandomForList } from '../../utils/math_utils.js'; // adjust import path
-  import { location } from 'svelte-spa-router';
+  import {ListDataFromFilePathEnum, ListFiles,} from '../../../wailsjs/go/file_services/FileService';
+  import {FilePathEnums} from '../../enums/file_path_enums.js';
+  import {TranslateFromToEnums} from '../../enums/translate_from_to_enums.js';
+  import {location} from 'svelte-spa-router';
   import {loadPageState, savePageState} from '../../utils/page_state.js';
-  import { LogInfo } from '../../../wailsjs/runtime/runtime.js';
+  import {LogInfo} from '../../../wailsjs/runtime/runtime.js';
   import WordMeaningDisplayCard from "../../components/common/card/WordMeaningDisplayCard.svelte";
   import LanguageDirectionSelector from "../../components/common/dropdown/LanguageDirectionSelector.svelte";
 
@@ -24,7 +18,9 @@
   let allWords = [];
   let direction = TranslateFromToEnums.GermanToEnglish.name;
   let randomNum = 0;
-  let currentLocation
+  let currentLocation;
+  let wordMeaningCardRef;
+
 
   onMount(async () => {
     currentLocation = $location
@@ -35,8 +31,11 @@
       direction = state.direction || direction;
       randomNum = state.randomNum || 0;
 
-      if(allWords.length !== 0) {
-        setWordMeaning(randomNum);
+      await tick();
+      if (wordMeaningCardRef) {
+        wordMeaningCardRef.setWordMeaning(randomNum);
+      } else {
+        LogInfo("wordMeaningCardRef not available yet");
       }
     }
 
@@ -49,15 +48,15 @@
 
   });
 
-  // Reactive filtered list
-  $: filteredFiles = files.filter((file) =>
-    file.toLowerCase().includes(searchText.toLowerCase()),
-  );
-
-  // Auto-highlight first match when filtered list changes
-  $: if (filteredFiles.length > 0) {
-    highlightedIndex = 0;
+  function handleRandomNumChange(event) {
+    randomNum = event.detail.randomNum;
   }
+
+  function handleWordRemoved(event) {
+    allWords = event.detail.allWords;
+  }
+
+
   const toggleDropdown = () => {
     isOpen = true;
   };
@@ -75,24 +74,11 @@
       FilePathEnums.GermanAllWordFolderPath,
       file,
     );
-    setWordMeaning();
+    wordMeaningCardRef.setWordMeaning();
 
     isOpen = false; // close dropdown
   }
 
-  function setWordMeaning(num = getRandomForList(allWords)) {
-    randomNum = num;
-    word = allWords[randomNum];
-    const splittedWord = getSplitWordMeaningObject(
-      word,
-      DelimiterConstant.pipeSeparator,
-      direction,
-    );
-    if (splittedWord != null) {
-      word = splittedWord.word;
-      meaning = splittedWord.meaning;
-    }
-  }
 
   function handleKeyDown(e) {
     if (e.key === 'ArrowDown') {
@@ -116,9 +102,7 @@
   ];
 
   function handleDirectionChange(event) {
-    const temp = word;
-    word = meaning;
-    meaning = temp;
+    wordMeaningCardRef.swapWordAndMeaning();
   }
 
   onDestroy(() => {
@@ -127,13 +111,15 @@
     savePageState({ direction, searchText, allWords, randomNum }, currentLocation);
   });
 
-  let word = null;
-  let meaning = null;
 
+  // Reactive filtered list
+  $: filteredFiles = files.filter((file) =>
+          file.toLowerCase().includes(searchText.toLowerCase()),
+  );
 
-  function handleNext() {
-    // Replace this with your actual word list logic
-    setWordMeaning();
+  // Auto-highlight first match when filtered list changes
+  $: if (filteredFiles.length > 0) {
+    highlightedIndex = 0;
   }
 
 </script>
@@ -197,12 +183,12 @@
     </div>
   </div>
 
-  {#if word !== null}
-    <WordMeaningDisplayCard
-            word={word}
-            meaning={meaning}
-            on:next={handleNext}
-            direction="{direction}"
-    />
-  {/if}
+  <WordMeaningDisplayCard
+          bind:this={wordMeaningCardRef}
+          allWords={allWords}
+          direction="{direction}"
+          on:randomNumChanged={handleRandomNumChange}
+          on:wordRemoved={handleWordRemoved}
+          topic="{searchText}"
+  />
 </div>

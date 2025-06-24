@@ -5,6 +5,7 @@ import (
 	filepathconstants "lang-learner-wails/constants/file_path_constants"
 	file_utils "lang-learner-wails/pkg/utils/file_utils"
 	"lang-learner-wails/pkg/utils/folder_utils"
+	"lang-learner-wails/services/api_services"
 	"os"
 	"path/filepath"
 	"strings"
@@ -65,7 +66,7 @@ func (f *FileService) FindFileFromFilePathEnumIfExistsAndReturnEncoded(pathEnum 
 	}
 
 	for _, dir := range dirToSearch {
-		fileToSearch := filepath.Join(dir, strings.ToLower(fileName))
+		fileToSearch := filepath.Join(dir, strings.ToLower(fileName)+".mp3")
 		if file_utils.FileExists(fileToSearch) {
 			data, err := os.ReadFile(fileToSearch)
 
@@ -74,8 +75,37 @@ func (f *FileService) FindFileFromFilePathEnumIfExistsAndReturnEncoded(pathEnum 
 			}
 			return "data:audio/mpeg;base64," + base64.StdEncoding.EncodeToString(data), nil
 		}
+	}
+	data, err := api_services.ElevenLabsTextToSpeechAudioBytes(fileName)
 
+	if err != nil {
+		println(err)
+		return "", err
 	}
 
+	if data != nil {
+
+		var folderToSave string
+
+		if shouldSearchAll {
+			folderToSave = filepathconstants.RandomAudioFolderAbsolutePath
+		} else {
+			folderToSave = filepath.Join(mainPath, strings.ToLower(subDirName))
+		}
+
+		err := os.MkdirAll(folderToSave, os.ModePerm)
+		if err != nil {
+			return "", err
+		}
+
+		err = os.WriteFile(filepath.Join(folderToSave, strings.ToLower(fileName)+".mp3"), data, 0644)
+		if err != nil {
+			return "", err
+		}
+
+		return "data:audio/mpeg;base64," + base64.StdEncoding.EncodeToString(data), nil
+	}
+
+	println("Erorr with api")
 	return "", nil
 }

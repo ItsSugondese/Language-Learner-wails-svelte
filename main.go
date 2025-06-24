@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"embed"
+	"lang-learner-wails/config"
+	logger_config "lang-learner-wails/config/logger-config"
 	"lang-learner-wails/services/file_services"
+	"log"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -12,6 +15,12 @@ import (
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+func init() {
+	log.Println("Loading environment variables and database connection")
+	// load .env
+	config.LoadEnvVariables()
+}
 
 func main() {
 	// Create an instance of the app structure
@@ -39,6 +48,7 @@ func main() {
 			fileService,
 			filePickerService,
 		},
+		Logger: &logger_config.CustomLogger{},
 	})
 
 	if err != nil {
