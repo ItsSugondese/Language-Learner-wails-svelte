@@ -17,3 +17,7 @@ export function ListDataFromFilePathEnum(arg1, arg2) {
 export function ListFiles(arg1, arg2) {
   return window['go']['file_services']['FileService']['ListFiles'](arg1, arg2);
 }
+
+export function LoadAllAudioInDirectory(arg1, arg2, arg3) {
+  return window['go']['file_services']['FileService']['LoadAllAudioInDirectory'](arg1, arg2, arg3);
+}

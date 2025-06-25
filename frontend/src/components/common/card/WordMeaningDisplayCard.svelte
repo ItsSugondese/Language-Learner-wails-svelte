@@ -43,6 +43,13 @@
     }
   }
 
+  export function getWordMeaningValue() {
+    return Object.freeze({
+      word: word,
+      meaning: meaning,
+    });
+  }
+
   export function swapWordAndMeaning() {
     const temp = word;
     word = meaning;
@@ -139,7 +146,7 @@
 
           <button
                   on:click={removeWord}
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded"
+                  class="bg-red-500 hover:bg-gray-400 text-white font-semibold px-4 py-2 rounded"
           >
             Remove
           </button>

@@ -1,7 +1,11 @@
 <script>
   import {onDestroy, onMount, tick} from 'svelte';
 
-  import {ListDataFromFilePathEnum, ListFiles,} from '../../../wailsjs/go/file_services/FileService';
+  import {
+    ListDataFromFilePathEnum,
+    ListFiles,
+    LoadAllAudioInDirectory,
+  } from '../../../wailsjs/go/file_services/FileService';
   import {FilePathEnums} from '../../enums/file_path_enums.js';
   import {TranslateFromToEnums} from '../../enums/translate_from_to_enums.js';
   import {location} from 'svelte-spa-router';
@@ -9,6 +13,7 @@
   import {LogInfo} from '../../../wailsjs/runtime/runtime.js';
   import WordMeaningDisplayCard from "../../components/common/card/WordMeaningDisplayCard.svelte";
   import LanguageDirectionSelector from "../../components/common/dropdown/LanguageDirectionSelector.svelte";
+  import SuccessPopup from "../../components/common/popup/SuccessPopup.svelte";
 
   let searchText = '';
   let files = [];
@@ -16,13 +21,15 @@
   let highlightedIndex = -1;
   let container; // Reference to wrapper div
   let allWords = [];
-  let direction = TranslateFromToEnums.GermanToEnglish.name;
+  let direction;
   let randomNum = 0;
   let currentLocation;
   let wordMeaningCardRef;
+  let showSuccessPopup = false;
 
 
   onMount(async () => {
+    direction = TranslateFromToEnums.GermanToEnglish.name;
     currentLocation = $location
     const state = await loadPageState(currentLocation);
     if (state) {
@@ -77,6 +84,11 @@
     wordMeaningCardRef.setWordMeaning();
 
     isOpen = false; // close dropdown
+  }
+
+  async function loadAllWordsAudio() {
+    await LoadAllAudioInDirectory(FilePathEnums.GermanAllWordFolderPath,FilePathEnums.GermanAllWordAudioFolderAbsolutePath, searchText);
+    showSuccessPopup = true;
   }
 
 
@@ -181,6 +193,13 @@
         {/if}
       {/if}
     </div>
+
+    <button
+            on:click={loadAllWordsAudio}
+            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded mt-3"
+    >
+      Load Audio
+    </button>
   </div>
 
   <WordMeaningDisplayCard
@@ -192,3 +211,7 @@
           topic="{searchText}"
   />
 </div>
+
+{#if showSuccessPopup}
+  <SuccessPopup message="Your action was successful!" onClose={() => showSuccessPopup = false} />
+{/if}

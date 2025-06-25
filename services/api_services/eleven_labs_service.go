@@ -13,7 +13,6 @@ import (
 
 func ElevenLabsTextToSpeechAudioBytes(text string) ([]byte, error) {
 	apiKey := os.Getenv("ELEVEN_LABS_API_KEY")
-	println("API Key: " + apiKey)
 	// Prepare request body
 	bodyData := map[string]string{
 		"text":     text,
