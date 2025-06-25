@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import {createEventDispatcher, onDestroy, onMount} from 'svelte';
   import { LogInfo } from '../../../../wailsjs/runtime/runtime.js';
   import { FindFileFromFilePathEnumIfExistsAndReturnEncoded } from '../../../../wailsjs/go/file_services/FileService.js';
   import { FilePathEnums } from '../../../enums/file_path_enums.js';
@@ -17,6 +17,18 @@
 
   export let isRandomScreen = false;
   export let topic = '';
+
+  let removeButton;
+  let nextButton;
+  let wordAudio;
+  let meaningAudio;
+
+
+  onMount( () => {
+    window.addEventListener('keydown', handleKeyDown);
+
+  })
+
   function reveal() {
     showMeaning = !showMeaning;
   }
@@ -62,56 +74,79 @@
     setWordMeaning();
   }
 
+  function handleKeyDown(event) {
+    if (event.altKey && event.key === 'r') {
+      event.preventDefault(); // prevent default browser save
+      removeWord()
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault(); // prevent default browser save
+      nextCard()
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault(); // prevent default browser save
+      playAudio(word, true)
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault(); // prevent default browser save
+      playAudio(meaning, false)
+    }
+  }
 
 
   async function playAudio(word, isWord) {
-    let base64;
+    if (word) {
+      let base64;
 
-    if (direction === TranslateFromToEnums.EnglishToGerman.name) {
-      if (isWord) {
-        base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
-                FilePathEnums.EnglishAudioFolderAbsolutePath,
-                '',
-                word ,
-                false,
-        );
+      if (direction === TranslateFromToEnums.EnglishToGerman.name) {
+        if (isWord) {
+          base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
+                  FilePathEnums.EnglishAudioFolderAbsolutePath,
+                  '',
+                  word,
+                  false,
+          );
+        } else {
+          base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
+                  FilePathEnums.GermanAudioFolderAbsolutePath,
+                  !isRandomScreen ? topic : '',
+                  word,
+                  isRandomScreen,
+          );
+        }
       } else {
-        base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
-                FilePathEnums.GermanAudioFolderAbsolutePath,
-                !isRandomScreen ? topic : '',
-                word ,
-                isRandomScreen,
+        if (isWord) {
+          base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
+                  FilePathEnums.GermanAudioFolderAbsolutePath,
+                  !isRandomScreen ? topic : '',
+                  word,
+                  isRandomScreen,
+          );
+        } else {
+          base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
+                  FilePathEnums.EnglishAudioFolderAbsolutePath,
+                  '',
+                  word,
+                  false,
+          );
+        }
 
-        );
+
       }
-    } else {
-      if (isWord) {
-        base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
-                FilePathEnums.GermanAudioFolderAbsolutePath,
-                !isRandomScreen ? topic : '',
-                word ,
-                isRandomScreen,
-        );
+      if (base64) {
+        const audio = new Audio(base64);
+        audio.play();
       } else {
-        base64 = await FindFileFromFilePathEnumIfExistsAndReturnEncoded(
-                FilePathEnums.EnglishAudioFolderAbsolutePath,
-                '',
-                word ,
-                false,
-        );
+        LogInfo("Audio file not found.");
       }
-
-
-  }
-
-
-    if (base64) {
-      const audio = new Audio(base64);
-      audio.play();
-    } else {
-      LogInfo("Audio file not found.");
     }
   }
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+  });
 </script>
 
 {#if word !== null}
