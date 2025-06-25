@@ -3,6 +3,7 @@ package file_services
 import (
 	"encoding/base64"
 	"fmt"
+	delimiter_constants "lang-learner-wails/constants/delimiter-constants"
 	filepathconstants "lang-learner-wails/constants/file_path_constants"
 	file_utils "lang-learner-wails/pkg/utils/file_utils"
 	"lang-learner-wails/pkg/utils/folder_utils"
@@ -48,6 +49,23 @@ func (f *FileService) ListDataFromFilePath(path string) ([]string, error) {
 	return filePathSlices, nil
 }
 
+func (f *FileService) ListDataFromAllFiles(pathEnum string) (files []string, err error) {
+	allFilesPath, err := f.ListFiles(pathEnum, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, path := range allFilesPath {
+		dataFromFile, err := f.ListDataFromFilePath(path)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, dataFromFile...)
+	}
+	return files, nil
+}
+
 func (f *FileService) FindFileFromFilePathEnumIfExistsAndReturnEncoded(pathEnum string, subDirName, fileName string, shouldSearchAll bool) (string, error) {
 	var dirToSearch []string
 	//var err error
@@ -91,7 +109,7 @@ func (f *FileService) LoadAllAudioInDirectory(textPathEnum string, audioPathEnum
 	for index, fileName := range fileData {
 		fmt.Printf("%d of %d\n", index+1, len(fileData))
 
-		parts := strings.Split(fileName, "|")
+		parts := strings.Split(fileName, delimiter_constants.PipeDelimiter)
 		if len(parts) > 0 {
 			word := strings.ToLower(strings.TrimSpace(parts[0]))
 			fileToSearch := filepath.Join(filepathconstants.FilePathMappings[audioPathEnum].Path, strings.ToLower(topicName), word+".mp3")

@@ -3,6 +3,8 @@
 
 export function FindFileFromFilePathEnumIfExistsAndReturnEncoded(arg1:string,arg2:string,arg3:string,arg4:boolean):Promise<string>;
 
+export function ListDataFromAllFiles(arg1:string):Promise<Array<string>>;
+
 export function ListDataFromFilePath(arg1:string):Promise<Array<string>>;
 
 export function ListDataFromFilePathEnum(arg1:string,arg2:string):Promise<Array<string>>;

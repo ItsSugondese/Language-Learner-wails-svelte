@@ -6,6 +6,10 @@ export function FindFileFromFilePathEnumIfExistsAndReturnEncoded(arg1, arg2, arg
   return window['go']['file_services']['FileService']['FindFileFromFilePathEnumIfExistsAndReturnEncoded'](arg1, arg2, arg3, arg4);
 }
 
+export function ListDataFromAllFiles(arg1) {
+  return window['go']['file_services']['FileService']['ListDataFromAllFiles'](arg1);
+}
+
 export function ListDataFromFilePath(arg1) {
   return window['go']['file_services']['FileService']['ListDataFromFilePath'](arg1);
 }
